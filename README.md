@@ -43,3 +43,10 @@ https://pixelperfecthub.netlify.app/
 - Optimized for 60fps animations
 - Mobile-first responsive design
 - Efficient CSS and JavaScript
+
+#Deployment
+## Install Netlify CLI (optional)
+npm install -g netlify-cli
+
+## Deploy
+netlify deploy --prod --dir .
