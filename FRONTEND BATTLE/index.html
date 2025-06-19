@@ -652,9 +652,88 @@
 </head>
 <body data-theme="light">
     <!-- Loader -->
-    <div class="loader" id="loader">
-        <div class="loader-spinner"></div>
-    </div>
+   <!-- Animated Bar Loader Start -->
+<div class="loader" id="loader">
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <p class="loader-msg">Loading Dashboard...</p>
+</div>
+
+<style>
+  .loader {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.6s ease, transform 1s ease;
+    transform-origin: center;
+  }
+
+  .loader.hidden {
+    opacity: 0;
+    transform: scale(3);
+    pointer-events: none;
+  }
+
+  .progress-bar-container {
+    width: 60%;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    background: white;
+    animation: fillBar 2.2s ease forwards;
+  }
+
+  @keyframes fillBar {
+    to {
+      width: 100%;
+    }
+  }
+
+  .loader-msg {
+    color: white;
+    margin-top: 1.5rem;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    animation: fadeInUp 1s ease-in-out infinite alternate;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0.6;
+      transform: translateY(5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(-5px);
+    }
+  }
+</style>
+
+<script>
+  window.addEventListener('load', () => {
+    // Wait for bar animation to complete + small delay
+    setTimeout(() => {
+      document.getElementById('loader').classList.add('hidden');
+    }, 2400);
+  });
+</script>
+<!-- Animated Bar Loader End -->
+
+
+
 
     <!-- Back to Dashboard Button -->
     <button class="back-btn" id="backBtn" onclick="showDashboard()">← Dashboard</button>

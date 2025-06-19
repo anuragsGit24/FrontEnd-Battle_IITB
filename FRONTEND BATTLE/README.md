@@ -16,7 +16,7 @@ A comprehensive frontend dashboard showcasing modern web development assets incl
 - ✅ Custom Loader
 
 ## AI Tools Used
-- Claude AI for code optimization
+- Claude AI for code generation and optimization
 
 ## Setup Instructions
 1. Clone this repository
