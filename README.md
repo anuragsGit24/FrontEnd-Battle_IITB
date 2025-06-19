@@ -44,7 +44,7 @@ https://pixelperfecthub.netlify.app/
 - Mobile-first responsive design
 - Efficient CSS and JavaScript
 
-#Deployment
+# Deployment
 ## Install Netlify CLI (optional)
 npm install -g netlify-cli
 
