@@ -24,7 +24,7 @@ A comprehensive frontend dashboard showcasing modern web development assets incl
 3. Or deploy to platforms like Netlify, Vercel, or GitHub Pages
 
 ## Live Demo
-https://vibeboardui.netlify.app/
+https://pixelperfecthub.netlify.app/
 
 ## Technologies Used
 - HTML5
