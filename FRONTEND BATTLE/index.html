@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Battle 2.0 - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #f093fb;
+            --bg-light: #ffffff;
+            --bg-dark: #1a1a1a;
+            --text-light: #333333;
+            --text-dark: #ffffff;
+            --card-light: #ffffff;
+            --card-dark: #2d2d2d;
+            --border-light: #e0e0e0;
+            --border-dark: #404040;
+        }
+
+        [data-theme="light"] {
+            --bg-color: var(--bg-light);
+            --text-color: var(--text-light);
+            --card-color: var(--card-light);
+            --border-color: var(--border-light);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: var(--bg-dark);
+            --text-color: var(--text-dark);
+            --card-color: var(--card-dark);
+            --border-color: var(--border-dark);
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        /* Loader */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader-spinner {
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 1rem 2rem;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] .navbar {
+            background: rgba(26, 26, 26, 0.95);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            text-align: center;
+            color: white;
+            z-index: 2;
+            padding: 2rem;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1rem;
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .cta-button {
+            padding: 1rem 2rem;
+            background: white;
+            color: var(--primary-color);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease 0.4s both;
+            display: inline-block;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Parallax Background */
+        .parallax-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 120%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            animation: parallaxFloat 20s ease-in-out infinite;
+        }
+
+        @keyframes parallaxFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(1deg); }
+        }
+
+        /* Dashboard Section */
+        .dashboard {
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .assets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .asset-card {
+            background: var(--card-color);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .asset-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .asset-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .asset-card:hover::before {
+            left: 100%;
+        }
+
+        .asset-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Carousel Section */
+        .carousel-container {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .carousel {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .carousel-slide {
+            min-width: 100%;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            position: relative;
+        }
+
+        .carousel-slide:nth-child(1) {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+        }
+
+        .carousel-slide:nth-child(2) {
+            background: linear-gradient(45deg, #48cae4, #023e8a);
+        }
+
+        .carousel-slide:nth-child(3) {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+        }
+
+        .carousel-nav {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .carousel-dot.active {
+            background: white;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .feature-card {
+            background: var(--card-color);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .ripple-effect {
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Stats Section */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .stat-card {
+            background: var(--card-color);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: var(--card-color);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+        }
+
+        .chart {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+            display: flex;
+            align-items: end;
+            justify-content: space-around;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .bar {
+            background: rgba(255, 255, 255, 0.8);
+            width: 40px;
+            border-radius: 5px 5px 0 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .bar:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+
+        .bar::after {
+            content: attr(data-value);
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Work Showcase */
+        .showcase-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .showcase-item {
+            background: var(--card-color);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .showcase-item:hover {
+            transform: scale(1.05);
+        }
+
+        .showcase-image {
+            height: 200px;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .showcase-content {
+            padding: 1.5rem;
+        }
+
+        /* Testimonials */
+        .testimonials-container {
+            background: var(--card-color);
+            padding: 4rem 2rem;
+            border-radius: 20px;
+            margin: 4rem 0;
+            text-align: center;
+        }
+
+        .testimonial {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .testimonial-text {
+            font-size: 1.2rem;
+            font-style: italic;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .testimonial-author {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* Customers Section */
+        .customers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .customer-logo {
+            background: var(--card-color);
+            height: 120px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .customer-logo:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Scroll Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Striking Effects */
+        .striking-text {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            font-size: 1.2em;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: brightness(1); }
+            to { filter: brightness(1.2); }
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: var(--card-color);
+                flex-direction: column;
+                padding: 2rem;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .assets-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .showcase-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Hidden sections */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Back to Dashboard Button */
+        .back-btn {
+            position: fixed;
+            top: 100px;
+            right: 2rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            display: none;
+        }
+
+        .back-btn.show {
+            display: block;
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <!-- Loader -->
+    <div class="loader" id="loader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <!-- Back to Dashboard Button -->
+    <button class="back-btn" id="backBtn" onclick="showDashboard()">← Dashboard</button>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">Frontend Battle 2.0</div>
+            <ul class="nav-links" id="navLinks">
+                <li><a onclick="showDashboard()">Dashboard</a></li>
+                <li><a onclick="showSection('carousel')">Carousel</a></li>
+                <li><a onclick="showSection('features')">Features</a></li>
+                <li><a onclick="showSection('stats')">Stats</a></li>
+                <li><a onclick="showSection('showcase')">Showcase</a></li>
+                <li><a onclick="showSection('testimonials')">Testimonials</a></li>
+            </ul>
+            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="parallax-bg"></div>
+        <div class="hero-content">
+            <h1>Frontend Battle 2.0</h1>
+            <p>Experience the ultimate showcase of modern web development assets</p>
+            <a href="#dashboard" class="cta-button" onclick="showDashboard()">Explore Dashboard</a>
+        </div>
+    </section>
+
+    <!-- Dashboard Section -->
+    <section class="dashboard fade-in" id="dashboard">
+        <h2 class="section-title">Asset Dashboard</h2>
+        <div class="assets-grid">
+            <div class="asset-card ripple-effect" onclick="showSection('carousel')">
+                <div class="asset-icon">🎠</div>
+                <h3>Carousel Switch</h3>
+                <p>Interactive image carousel with smooth transitions and navigation controls</p>
+            </div>
+            <div class="asset-card ripple-effect" onclick="showSection('cards')">
+                <div class="asset-icon">🃏</div>
+                <h3>Cards</h3>
+                <p>Beautiful card layouts with hover effects and responsive design</p>
+            </div>
+            <div class="asset-card ripple-effect" onclick="showSection('customers')">
+                <div class="asset-icon">👥</div>
+                <h3>Customers</h3>
+                <p>Showcase your trusted clients and partners with elegant logos</p>
+            </div>
+            <div class="asset-card ripple-effect" onclick="showSection('features')">
+                <div class="asset-icon">⭐</div>
+                <h3>Features & Services</h3>
+                <p>Highlight your key features and services with stunning visuals</p>
+            </div>
+            <div class="asset-card ripple-effect" onclick="showSection('stats')">
+                <div class="asset-icon">📊</div>
+                <h3>Graphs & Stats</h3>
+                <p>Dynamic charts and statistics with animated counters</p>
+            </div>
+            <div class="asset-card ripple-effect" onclick="showSection('showcase')">
+                <div class="asset-icon">🎨</div>
+                <h3>Work Showcase</h3>
+                <p>Portfolio gallery to display your best projects and achievements</p>
+            </div>
+            <div class="asset-card ripple-effect" onclick="showSection('parallax')">
+                <div class="asset-icon">🌊</div>
+                <h3>Parallax Animation</h3>
+                <p>Smooth parallax scrolling effects for immersive user experience</p>
+            </div>
+            <div class="asset-card ripple-effect" onclick="showSection('ripple')">
+                <div class="asset-icon">💫</div>
+                <h3>Ripple Effect</h3>
+                <p>Interactive ripple animations on click interactions</p>
+            </div>
+            <div class="asset-card ripple-effect" onclick="showSection('scroll')">
+                <div class="asset-icon">📜</div>
+                <h3>Scroll Effects</h3>
+                <p>Smooth scroll animations and pop-up effects on viewport entry</p>
+            </div>
+            <div class="asset-card ripple-effect" onclick="showSection('striking')">
+                <div class="asset-icon">⚡</div>
+                <h3>Striking Effects</h3>
+                <p>Eye-catching visual effects and animations to captivate users</p>
+            </div>
+            <div class="asset-card ripple-effect" onclick="showSection('testimonials')">
+                <div class="asset-icon">💬</div>
+                <h3>Testimonials</h3>
+                <p>Customer feedback section with rotating testimonials</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Carousel Section -->
+    <section class="section fade-in" id="carousel">
+        <div class="dashboard">
+            <h2 class="section-title">Carousel Switch</h2>
+            <div class="carousel-container">
+                <div class="carousel" id="carouselContainer">
+                    <div class="carousel-slide">
+                        <div>
+                            <h3>Slide 1</h3>
+                            <p>Beautiful carousel with smooth transitions</p>
+                        </div>
+                    </div>
+                    <div class="carousel-slide">
+                        <div>
+                            <h3>Slide 2</h3>
+                            <p>Interactive navigation controls</p>
+                        </div>
+                    </div>
+                    <div class="carousel-slide">
+                        <div>
+                            <h3>Slide 3</h3>
+                            <p>Responsive design for all devices</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-nav">
+                    <div class="carousel-dot active" onclick="goToSlide(0)"></div>
+                    <div class="carousel-dot" onclick="goToSlide(1)"></div>
+                    <div class="carousel-dot" onclick="goToSlide(2)"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cards Section -->
+    <section class="section fade-in" id="cards">
+        <div class="dashboard">
+            <h2 class="section-title">Feature Cards</h2>
+            <div class="features-grid">
+                <div class="feature-card ripple-effect">
+                    <div class="asset-icon">🚀</div>
+                    <h3>Performance</h3>
+                    <p>Lightning-fast load times and optimized performance for the best user experience</p>
+                </div>
+                <div class="feature-card ripple-effect">
+                    <div class="asset-icon">📱</div>
+                    <h3>Responsive</h3>
+                    <p>Perfectly responsive design that works seamlessly across all devices and screen sizes</p>
+                </div>
+                <div class="feature-card ripple-effect">
+                    <div class="asset-icon">🎨</div>
+                    <h3>Modern Design</h3>
+                    <p>Contemporary and elegant design following the latest UI/UX trends and best practices</p>
+                </div>
+                <div class="feature-card ripple-effect">
+                    <div class="asset-icon">🔒</div>
+                    <h3>Secure</h3>
+                    <p>Built with security in mind, implementing industry-standard security measures</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Customers Section -->
+    <section class="section fade-in" id="customers">
+        <div class="dashboard">
+            <h2 class="section-title">Our Trusted Customers</h2>
+            <div class="customers-grid">
+                <div class="customer-logo">TechCorp</div>
+                <div class="customer-logo">InnovateLabs</div>
+                <div class="customer-logo">FutureSoft</div>
+                <div class="customer-logo">DigitalPro</div>
+                <div class="customer-logo">CloudTech</div>
+                <div class="customer-logo">DataFlow</div>
+                <div class="customer-logo">NextGen</div>
+                <div class="customer-logo">SmartSys</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section fade-in" id="features">
+        <div class="dashboard">
+            <h2 class="section-title">Features & Services</h2>
+            <div class="features-grid">
+                <div class="feature-card ripple-effect">
+                    <div class="asset-icon">💻</div>
+                    <h3 class="striking-text">Web Development</h3>
+                    <p>Custom web applications built with modern technologies and best practices</p>
+                </div>
+                <div class="feature-card ripple-effect">
+                    <div class="asset-icon">📱</div>
+                    <h3 class="striking-text">Mobile Apps</h3>
+                    <p>Native and cross-platform mobile applications for iOS and Android</p>
+                </div>
+                <div class="feature-card ripple-effect">
+                    <div class="asset-icon">🎨</div>
+                    <h3 class="striking-text">UI/UX Design</h3>
+                    <p>Beautiful and intuitive user interfaces designed for optimal user experience</p>
+                </div>
+                <div class="feature-card ripple-effect">
+                    <div class="asset-icon">☁️</div>
+                    <h3 class="striking-text">Cloud Solutions</h3>
+                    <p>Scalable cloud infrastructure and deployment solutions for your applications</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <!-- Enhanced Stats Section with Parallax & Strike Animation -->
+<section class="section fade-in parallax-stats" id="stats">
+  <div class="dashboard">
+    <h2 class="section-title">Statistics & Achievements</h2>
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-number" data-target="150">0</div>
+        <p>Projects Completed</p>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" data-target="50">0</div>
+        <p>Happy Clients</p>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" data-target="98">0</div>
+        <p>Success Rate %</p>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" data-target="24">0</div>
+        <p>Awards Won</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .stat-card {
+    background: var(--card-color);
+    padding: 2rem;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-number {
+    font-size: 3rem;
+    font-weight: bold;
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+    position: relative;
+  }
+
+  .stat-number::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -50%;
+    width: 200%;
+    height: 5px;
+    background: linear-gradient(to right, transparent, white, transparent);
+    opacity: 0.6;
+    animation: strikeEffect 2s linear infinite;
+  }
+
+  @keyframes strikeEffect {
+    0% { left: -50%; }
+    100% { left: 100%; }
+  }
+
+  .parallax-stats {
+    background: url('https://www.transparenttextures.com/patterns/stardust.png');
+    background-attachment: fixed;
+    background-size: cover;
+    padding: 5rem 2rem;
+  }
+
+  .parallax-stats .section-title {
+    color: white;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const counters = document.querySelectorAll('.stat-number');
+    counters.forEach(counter => {
+      const update = () => {
+        const target = +counter.dataset.target;
+        const count = +counter.innerText;
+        const step = target / 100;
+        if (count < target) {
+          counter.innerText = Math.ceil(count + step);
+          setTimeout(update, 30);
+        } else {
+          counter.innerText = target;
+        }
+      };
+      update();
+    });
+  });
+</script>
+
+
+    <!-- Showcase Section -->
+    <section class="section fade-in" id="showcase">
+        <div class="dashboard">
+            <h2 class="section-title">Work Showcase</h2>
+            <div class="showcase-grid">
+                <div class="showcase-item">
+                    <div class="showcase-image">E-Commerce Platform</div>
+                    <div class="showcase-content">
+                        <h3>Modern E-Commerce</h3>
+                        <p>Full-featured online shopping platform with advanced cart functionality and payment integration</p>
+                    </div>
+                </div>
+                <div class="showcase-item">
+                    <div class="showcase-image">Dashboard Analytics</div>
+                    <div class="showcase-content">
+                        <h3>Analytics Dashboard</h3>
+                        <p>Real-time data visualization dashboard with interactive charts and comprehensive reporting</p>
+                    </div>
+                </div>
+                <div class="showcase-item">
+                    <div class="showcase-image">Mobile Banking App</div>
+                    <div class="showcase-content">
+                        <h3>Banking Application</h3>
+                        <p>Secure mobile banking solution with biometric authentication and transaction management</p>
+                    </div>
+                </div>
+                <div class="showcase-item">
+                    <div class="showcase-image">Social Media Platform</div>
+                    <div class="showcase-content">
+                        <h3>Social Network</h3>
+                        <p>Interactive social media platform with real-time messaging and content sharing features</p>
+                    </div>
+                </div>
+                <div class="showcase-item">
+                    <div class="showcase-image">Learning Management</div>
+                    <div class="showcase-content">
+                        <h3>LMS Platform</h3>
+                        <p>Comprehensive learning management system with course creation and progress tracking</p>
+                    </div>
+                </div>
+                <div class="showcase-item">
+                    <div class="showcase-image">Healthcare Portal</div>
+                    <div class="showcase-content">
+                        <h3>Medical Portal</h3>
+                        <p>Healthcare management system with appointment scheduling and patient record management</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Parallax Section -->
+    <section class="section fade-in" id="parallax">
+        <div class="dashboard">
+            <h2 class="section-title">Parallax Animation</h2>
+            <div style="height: 400px; background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); border-radius: 15px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; color: white;">
+                <div class="parallax-bg"></div>
+                <div style="z-index: 2; text-align: center;">
+                    <h3>Beautiful Parallax Effect</h3>
+                    <p>Smooth floating animation creates depth and visual interest</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ripple Effect Section -->
+    <section class="section fade-in" id="ripple">
+        <div class="dashboard">
+            <h2 class="section-title">Ripple Effect</h2>
+            <div class="features-grid">
+                <div class="feature-card ripple-effect" style="background: linear-gradient(45deg, #ff6b6b, #feca57); color: white;">
+                    <h3>Click Me!</h3>
+                    <p>Experience the ripple effect animation</p>
+                </div>
+                <div class="feature-card ripple-effect" style="background: linear-gradient(45deg, #48cae4, #023e8a); color: white;">
+                    <h3>Interactive</h3>
+                    <p>Smooth ripple animations on interaction</p>
+                </div>
+                <div class="feature-card ripple-effect" style="background: linear-gradient(45deg, #f093fb, #f5576c); color: white;">
+                    <h3>Engaging</h3>
+                    <p>Creates delightful user interactions</p>
+                </div>
+                <div class="feature-card ripple-effect" style="background: linear-gradient(45deg, #a8edea, #fed6e3); color: #333;">
+                    <h3>Responsive</h3>
+                    <p>Works perfectly on all devices</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scroll Effects Section -->
+    <section class="section fade-in" id="scroll">
+        <div class="dashboard">
+            <h2 class="section-title">Scroll & Pop-up Effects</h2>
+            <div class="features-grid">
+                <div class="feature-card fade-in">
+                    <div class="asset-icon">📜</div>
+                    <h3>Fade In Animation</h3>
+                    <p>Elements fade in smoothly as they enter the viewport</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="asset-icon">⬆️</div>
+                    <h3>Slide Up Effect</h3>
+                    <p>Content slides up with elegant timing</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="asset-icon">✨</div>
+                    <h3>Staggered Animation</h3>
+                    <p>Sequential animations create visual flow</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="asset-icon">🎭</div>
+                    <h3>Transform Effects</h3>
+                    <p>Smooth transforms enhance user experience</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Striking Effects Section -->
+    <section class="section fade-in" id="striking">
+        <div class="dashboard">
+            <h2 class="section-title">Striking Visual Effects</h2>
+            <div class="features-grid">
+                <div class="feature-card" style="background: linear-gradient(45deg, #667eea, #764ba2); color: white;">
+                    <div class="asset-icon">⚡</div>
+                    <h3 class="striking-text" style="color: white;">Lightning Fast</h3>
+                    <p>High-performance animations and effects</p>
+                </div>
+                <div class="feature-card" style="background: linear-gradient(45deg, #f093fb, #f5576c); color: white;">
+                    <div class="asset-icon">🌟</div>
+                    <h3 class="striking-text" style="color: white;">Eye-Catching</h3>
+                    <p>Visually stunning effects that captivate users</p>
+                </div>
+                <div class="feature-card" style="background: linear-gradient(45deg, #4facfe, #00f2fe); color: white;">
+                    <div class="asset-icon">💎</div>
+                    <h3 class="striking-text" style="color: white;">Premium Quality</h3>
+                    <p>Professional-grade visual effects and animations</p>
+                </div>
+                <div class="feature-card" style="background: linear-gradient(45deg, #43e97b, #38f9d7); color: white;">
+                    <div class="asset-icon">🎨</div>
+                    <h3 class="striking-text" style="color: white;">Creative Design</h3>
+                    <p>Innovative and creative visual solutions</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="section fade-in" id="testimonials">
+        <div class="dashboard">
+            <h2 class="section-title">Client Testimonials</h2>
+            <div class="testimonials-container">
+                <div class="testimonial" id="testimonial">
+                    <p class="testimonial-text">"Outstanding work! The team delivered exactly what we needed with exceptional quality and attention to detail. Highly recommended!"</p>
+                    <p class="testimonial-author">- Sarah Johnson, CEO TechCorp</p>
+                </div>
+            </div>
+            <div class="features-grid" style="margin-top: 3rem;">
+                <div class="feature-card">
+                    <div class="asset-icon">⭐</div>
+                    <h3>5-Star Rating</h3>
+                    <p>Consistently rated 5 stars by our clients</p>
+                </div>
+                <div class="feature-card">
+                    <div class="asset-icon">🏆</div>
+                    <h3>Award Winner</h3>
+                    <p>Recognized for excellence in web development</p>
+                </div>
+                <div class="feature-card">
+                    <div class="asset-icon">👥</div>
+                    <h3>Trusted by 50+ Companies</h3>
+                    <p>Serving businesses of all sizes globally</p>
+                </div>
+                <div class="feature-card">
+                    <div class="asset-icon">📈</div>
+                    <h3>98% Success Rate</h3>
+                    <p>Proven track record of successful projects</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Loader
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+            }, 1500);
+        });
+
+        // Theme Toggle
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', newTheme);
+            
+            const themeBtn = document.querySelector('.theme-toggle');
+            themeBtn.textContent = newTheme === 'light' ? '🌙' : '☀️';
+        }
+
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('active');
+        }
+
+        // Section Navigation
+        function showSection(sectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            // Hide dashboard and hero
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('hero').style.display = 'none';
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Show back button
+            document.getElementById('backBtn').classList.add('show');
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+            
+            // Trigger animations
+            animateElements();
+        }
+
+        function showDashboard() {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            // Show dashboard and hero
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('hero').style.display = 'flex';
+            
+            // Hide back button
+            document.getElementById('backBtn').classList.remove('show');
+            
+            // Scroll to dashboard
+            document.getElementById('dashboard').scrollIntoView({ behavior: 'smooth' });
+            
+            // Trigger animations
+            animateElements();
+        }
+
+        // Carousel functionality
+        let currentSlide = 0;
+        const totalSlides = 3;
+
+        function goToSlide(slideIndex) {
+            currentSlide = slideIndex;
+            const carousel = document.getElementById('carouselContainer');
+            carousel.style.transform = `translateX(-${slideIndex * 100}%)`;
+            
+            // Update dots
+            const dots = document.querySelectorAll('.carousel-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === slideIndex);
+            });
+        }
+
+        // Auto-rotate carousel
+        setInterval(() => {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            goToSlide(currentSlide);
+        }, 4000);
+
+        // Ripple Effect
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.ripple-effect')) {
+                const button = e.target.closest('.ripple-effect');
+                const rect = button.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                
+                button.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            }
+        });
+
+        // Scroll Animations
+        function animateElements() {
+            const elements = document.querySelectorAll('.fade-in');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+            
+            elements.forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // Counter Animation
+        function animateCounters() {
+            const counters = document.querySelectorAll('.stat-number');
+            
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target'));
+                const increment = target / 100;
+                let current = 0;
+                
+                const updateCounter = () => {
+                    if (current < target) {
+                        current += increment;
+                        counter.textContent = Math.ceil(current);
+                        setTimeout(updateCounter, 20);
+                    } else {
+                        counter.textContent = target;
+                    }
+                };
+                
+                updateCounter();
+            });
+        }
+
+        // Testimonials Rotation
+        const testimonials = [
+            {
+                text: "Outstanding work! The team delivered exactly what we needed with exceptional quality and attention to detail. Highly recommended!",
+                author: "Sarah Johnson, CEO TechCorp"
+            },
+            {
+                text: "Incredible experience working with this team. They transformed our vision into reality with stunning results.",
+                author: "Mike Chen, CTO InnovateLabs"
+            },
+            {
+                text: "Professional, efficient, and creative. They exceeded our expectations in every way possible.",
+                author: "Emily Rodriguez, Founder FutureSoft"
+            }
+        ];
+
+        let currentTestimonial = 0;
+
+        function rotateTestimonials() {
+            const testimonialElement = document.getElementById('testimonial');
+            const textElement = testimonialElement.querySelector('.testimonial-text');
+            const authorElement = testimonialElement.querySelector('.testimonial-author');
+            
+            // Fade out
+            testimonialElement.style.opacity = '0';
+            
+            setTimeout(() => {
+                // Update content
+                textElement.textContent = `"${testimonials[currentTestimonial].text}"`;
+                authorElement.textContent = `- ${testimonials[currentTestimonial].author}`;
+                
+                // Fade in
+                testimonialElement.style.opacity = '1';
+                
+                // Next testimonial
+                currentTestimonial = (currentTestimonial + 1) % testimonials.length;
+            }, 300);
+        }
+
+        // Start testimonial rotation
+        setInterval(rotateTestimonials, 5000);
+
+        // Initialize animations on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            animateElements();
+            setTimeout(animateCounters, 2000);
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 100) {
+                navbar.style.background = 'rgba(255, 255, 255, 0.98)';
+                navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
+            } else {
+                navbar.style.background = 'rgba(255, 255, 255, 0.95)';
+                navbar.style.boxShadow = 'none';
+            }
+        });
+
+        // Add AI Tools Mention (as required by the competition)
+        console.log('AI Tools Used: Claude AI for code generation and optimization');
+    </script>
+</body>
+</html>
+<!-- target="150">0</div>
+                    <p>Projects Completed</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" data-target="50">0</div>
+                    <p>Happy Clients</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" data-target="98">0</div>
+                    <p>Success Rate %</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" data- -->
