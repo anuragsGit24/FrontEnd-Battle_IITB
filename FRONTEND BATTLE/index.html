@@ -859,6 +859,7 @@
 
     <!-- Stats Section -->
     <!-- Enhanced Stats Section with Parallax & Strike Animation -->
+<!-- Enhanced Stats Section with Parallax & Strike Animation + Responsive Chart -->
 <section class="section fade-in parallax-stats" id="stats">
   <div class="dashboard">
     <h2 class="section-title">Statistics & Achievements</h2>
@@ -880,8 +881,130 @@
         <p>Awards Won</p>
       </div>
     </div>
+
+    <div class="chart-container">
+      <h3 style="text-align:center; margin: 2rem 0;">Annual Growth (2021 - 2024)</h3>
+      <canvas id="growthChart"></canvas>
+    </div>
   </div>
 </section>
+
+<style>
+  .stat-card {
+    background: var(--card-color);
+    padding: 2rem;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-number {
+    font-size: 3rem;
+    font-weight: bold;
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+    position: relative;
+  }
+
+  .stat-number::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -50%;
+    width: 200%;
+    height: 5px;
+    background: linear-gradient(to right, transparent, white, transparent);
+    opacity: 0.6;
+    animation: strikeEffect 2s linear infinite;
+  }
+
+  @keyframes strikeEffect {
+    0% { left: -50%; }
+    100% { left: 100%; }
+  }
+
+  .parallax-stats {
+    background: url('https://www.transparenttextures.com/patterns/stardust.png');
+    background-attachment: fixed;
+    background-size: cover;
+    padding: 5rem 2rem;
+  }
+
+  .parallax-stats .section-title {
+    color: white;
+  }
+
+  .chart-container {
+    background: var(--card-color);
+    padding: 2rem;
+    margin-top: 4rem;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  canvas {
+    width: 100% !important;
+    max-width: 600px;
+    margin: 0 auto;
+    display: block;
+  }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const counters = document.querySelectorAll('.stat-number');
+    counters.forEach(counter => {
+      const update = () => {
+        const target = +counter.dataset.target;
+        const count = +counter.innerText;
+        const step = target / 100;
+        if (count < target) {
+          counter.innerText = Math.ceil(count + step);
+          setTimeout(update, 30);
+        } else {
+          counter.innerText = target;
+        }
+      };
+      update();
+    });
+
+    const ctx = document.getElementById('growthChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['2021', '2022', '2023', '2024'],
+        datasets: [{
+          label: 'Growth %',
+          data: [40, 60, 75, 90],
+          borderColor: '#667eea',
+          backgroundColor: 'rgba(102,126,234,0.2)',
+          tension: 0.3,
+          fill: true,
+          pointBackgroundColor: '#667eea'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: value => value + '%'
+            }
+          }
+        }
+      }
+    });
+  });
+</script>
 
 <style>
   .stat-card {
